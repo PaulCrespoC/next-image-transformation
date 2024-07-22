@@ -18,10 +18,9 @@ Bun.serve({
                 },
             });
         }
-
         if (url.pathname === "/health") {
             return new Response("OK");
-        };
+        }
         if (url.pathname.startsWith("/image/")) return await resize(url);
         return Response.redirect("https://github.com/coollabsio/next-image-transformation", 302);
     }
@@ -38,7 +37,7 @@ async function resize(url) {
         return false;
     })
     if (allowed.length === 0) {
-        return new Response(`Domain (${origin}) not allowed. More details here: https://github.com/coollabsio/next-image-transformation`, { status: 403 });
+        return new Response(`Domain (${origin}) not allowed. More details here: https://github.com/coollabsio/next-image-transformation`, {status: 403});
     }
     const width = url.searchParams.get("width") || 0;
     const height = url.searchParams.get("height") || 0;
@@ -48,6 +47,8 @@ async function resize(url) {
         const image = await fetch(url, {
             headers: {
                 "Accept": "image/avif,image/webp,image/apng,*/*",
+                "Access-Control-Allow-Origin": allowedDomains,
+                "Access-Control-Allow-Methods": "GET",
             }
         })
         const headers = new Headers(image.headers);

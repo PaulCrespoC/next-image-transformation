@@ -47,7 +47,7 @@ async function resize(url) {
         const image = await fetch(url, {
             headers: {
                 "Accept": "image/avif,image/webp,image/apng,*/*",
-                "Access-Control-Allow-Origin": allowedDomains,
+                "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET",
             }
         })

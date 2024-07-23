@@ -7,9 +7,21 @@ if (process.env.NODE_ENV === "development") {
 }
 allowedDomains = allowedDomains.map(d => d.trim());
 
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS, POST',
+    'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 Bun.serve({
     port: 3000,
     async fetch(req) {
+
+        if (req.method === 'OPTIONS') {
+            const res = new Response('Departed', {headers: CORS_HEADERS});
+            return res;
+        }
+
         const url = new URL(req.url);
         if (url.pathname === "/") {
             return new Response(`<h3>Next Image Transformation v${version}</h3>More info <a href="https://github.com/coollabsio/next-image-transformation">https://github.com/coollabsio/next-image-transformation</a>.`, {
@@ -19,7 +31,7 @@ Bun.serve({
             });
         }
         if (url.pathname === "/health") {
-            return new Response("OK");
+            return new Response("OK", {headers: CORS_HEADERS});
         }
         if (url.pathname.startsWith("/image/")) return await resize(url);
         return Response.redirect("https://github.com/coollabsio/next-image-transformation", 302);
@@ -46,15 +58,17 @@ async function resize(url) {
         const url = `${imgproxyUrl}/${preset}/resize:fill:${width}:${height}/q:${quality}/plain/${src}`
         const image = await fetch(url, {
             headers: {
-                "Accept": "image/avif,image/webp,image/apng,*/*",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
+                "Accept": "image/avif,image/webp,image/apng,*/*"
             }
         })
         const headers = new Headers(image.headers);
         headers.set("Server", "NextImageTransformation");
+
         return new Response(image.body, {
-            headers
+            headers: {
+                ...headers,
+                ...CORS_HEADERS
+            }
         })
     } catch (e) {
         console.log(e)
